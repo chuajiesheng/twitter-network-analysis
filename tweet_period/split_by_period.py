@@ -75,3 +75,32 @@ MILESTONES = [datetime(2015, 11, 2, tzinfo=PACIFIC),
 
 print_date = lambda dt: dt.isoformat(timespec='microseconds')
 print('Milestones:', list(map(print_date, MILESTONES)))
+
+
+# Split
+def test_date(dt, milestones=MILESTONES):
+    for b in range(0, len(milestones)):
+        if dt < milestones[b]:
+            return b
+    return 4
+
+BASE_FILE_OUT = './tweet_period/output/block_{}.json'
+split_to_files = [BASE_FILE_OUT.format(i) for i in range(0, len(MILESTONES) + 1)]
+DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
+
+
+def write_to(block, json_object, list_of_files=split_to_files):
+    with open(list_of_files[block], 'a') as f:
+        json.dump(json_object, f)
+
+
+def read_and_split(filename):
+    tweets = read_file(filename)
+    for t in tweets:
+        posted_time = datetime.strptime(t['postedTime'], DATETIME_FORMAT).replace(tzinfo=timezone.utc)
+        block = test_date(posted_time)
+        write_to(block, t)
+
+for f in files:
+    read_and_split(f)
+    dot()
