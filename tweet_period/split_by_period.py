@@ -40,9 +40,11 @@ assert len(files) == 21888
 
 # Verify files
 dot = lambda: print('.', end='', flush=True)
-for f in files:
-    read_file(f)
-    dot()
+VERIFY_FILES = False
+if VERIFY_FILES:
+    for f in files:
+        read_file(f)
+        dot()
 
 # Periods
 '''
