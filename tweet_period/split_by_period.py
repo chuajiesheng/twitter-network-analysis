@@ -101,6 +101,11 @@ def read_and_split(filename):
         block = test_date(posted_time)
         write_to(block, t)
 
+    return len(tweets)
+
+total = 0
 for f in files:
-    read_and_split(f)
+    total += read_and_split(f)
     dot()
+
+print('Wrote:', total)
