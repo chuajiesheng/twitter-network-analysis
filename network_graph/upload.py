@@ -190,3 +190,15 @@ for f in files:
     rejected = read_and_export(f)
     all_rejected_tweets += rejected
     dot()
+
+new_rejected_tweets = []
+tries_left = 10
+while tries_left > 0:
+    print(tries_left, end='', flush=True)
+
+    for t in all_rejected_tweets:
+        rejected = process_tweet(t)
+        new_rejected_tweets.append(rejected)
+
+    all_rejected_tweets = new_rejected_tweets
+    new_rejected_tweets = []
