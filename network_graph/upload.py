@@ -164,17 +164,19 @@ def read_and_export(filename):
             replying_to_user = replying_to_tweet.split('/')[3]
 
             reply_to = find_user_by_display_name(graph, replying_to_user)
-            existing_rel = find_relation(graph, reply_to, replying_to_tweet)
-            # print('Found: {} reply {}'.format(existing_rel, replying_to_tweet))
+
+            u = add_user(graph, t['actor']['id'], t['actor']['preferredUsername'], t['actor']['link'])
+            add_relation(graph, u, reply_to, 'reply', tweet_id, t['link'], test_date(posted_time))
         elif is_retweet(t):
             link_of_previous_tweet = t['object']['link']
             replying_to_user = link_of_previous_tweet.split('/')[3]
 
             original_tweet_user = find_user_by_display_name(graph, replying_to_user)
-            retweet_of = find_relation(graph, original_tweet_user, link_of_previous_tweet)
-            # print('Found: {} retweet of {}'.format(retweet_of, t['object']['link']))
+
+            u = add_user(graph, t['actor']['id'], t['actor']['preferredUsername'], t['actor']['link'])
+            add_relation(graph, u, original_tweet_user, 'retweet', tweet_id, t['link'], test_date(posted_time))
         else:
-            print(t)
+            print('Alien:', t['id'])
 
     return len(tweets)
 
