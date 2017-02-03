@@ -85,13 +85,23 @@ def test_date(dt, milestones=MILESTONES):
     return 4
 
 BASE_FILE_OUT = './tweet_period/output/block_{}.json'
+RELATION_FILE_OUT = './tweet_period/output/relation.csv'
 split_to_files = [BASE_FILE_OUT.format(i) for i in range(0, len(MILESTONES) + 1)]
 DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 
 def write_to(block, json_object, list_of_files=split_to_files):
     with open(list_of_files[block], 'a') as f:
-        json.dump(json_object, f)
+        f.write(json.dumps(json_object))
+        f.write('\n')
+
+    with open(RELATION_FILE_OUT, 'a') as f:
+        t = json_object
+        body = t['body'].replace('\n', ' ').replace('\r', '').replace('"', '""')
+        in_reply_to = 'inReplyTo' in t.keys() and t['inReplyTo']
+        retweet_of = t['object']['id']
+        f.write('"{}",{},{},"{}","{}","{}","{}",{}\n'
+                .format(t['id'], t['verb'], t['postedTime'], body, t['link'], in_reply_to, retweet_of, block))
 
 
 def read_and_split(filename):
