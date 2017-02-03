@@ -194,7 +194,7 @@ for f in files:
 new_rejected_tweets = []
 tries_left = 10
 while tries_left > 0:
-    print(tries_left, end='', flush=True)
+    print('Tries:', tries_left, 'Rejected:', len(all_rejected_tweets), end='', flush=True)
 
     for t in all_rejected_tweets:
         rejected = process_tweet(t)
@@ -202,3 +202,5 @@ while tries_left > 0:
 
     all_rejected_tweets = new_rejected_tweets
     new_rejected_tweets = []
+
+print('Remaining rejected:', len(all_rejected_tweets))
