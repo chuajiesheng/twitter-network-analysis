@@ -178,15 +178,9 @@ def process_tweet(tweet):
         u = add_user(graph, tweet['actor']['id'], tweet['actor']['preferredUsername'], tweet['actor']['link'])
         add_relation(graph, u, reply_to, 'reply', tweet_id, tweet['link'], test_date(posted_time))
     elif is_retweet(tweet):
-        link_of_previous_tweet = tweet['object']['link']
-        replying_to_user = link_of_previous_tweet.split('/')[3]
-
-        original_tweet_user = find_user_by_display_name(graph, replying_to_user)
-        if not original_tweet_user:
-            return tweet
-
-        u = add_user(graph, tweet['actor']['id'], tweet['actor']['preferredUsername'], tweet['actor']['link'])
-        add_relation(graph, u, original_tweet_user, 'retweet', tweet_id, tweet['link'], test_date(posted_time))
+        src = add_user(graph, tweet['actor']['id'], tweet['actor']['preferredUsername'], tweet['actor']['link'])
+        dest = add_user(graph, tweet['object']['actor']['id'], tweet['object']['actor']['preferredUsername'], tweet['object']['actor']['link'])
+        add_relation(graph, src, dest, 'retweet', tweet_id, tweet['link'], test_date(posted_time))
     else:
         print('Alien:', tweet['id'])
 
