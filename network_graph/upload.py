@@ -149,40 +149,50 @@ dummy_user = add_user(graph, DUMMY_USER, DUMMY_USER, DUMMY_USER)
 
 def read_and_export(filename):
     tweets = read_file(filename)
+
+    rejected_tweets = []
+    for t in tweets:
+        rejected_tweets.append(process_tweet(t))
+
+    return rejected_tweets
+
+
+def process_tweet(tweet):
     is_reply = lambda tweet: 'inReplyTo' in tweet.keys() and tweet['inReplyTo']
     is_retweet = lambda tweet: tweet['verb'] == 'share'
 
-    for t in tweets:
-        posted_time = datetime.strptime(t['postedTime'], DATETIME_FORMAT).replace(tzinfo=timezone.utc)
-        tweet_id = t['id'][t['id'].rindex(':') + 1:]
+    posted_time = datetime.strptime(tweet['postedTime'], DATETIME_FORMAT).replace(tzinfo=timezone.utc)
+    tweet_id = tweet['id'][tweet['id'].rindex(':') + 1:]
 
-        if not is_reply(t) and not is_retweet(t):
-            u = add_user(graph, t['actor']['id'], t['actor']['preferredUsername'], t['actor']['link'])
-            add_relation(graph, u, dummy_user, 'tweet', tweet_id, t['link'], test_date(posted_time))
-        elif is_reply(t):
-            replying_to_tweet = t['inReplyTo']['link']
-            replying_to_user = replying_to_tweet.split('/')[3]
+    if not is_reply(tweet) and not is_retweet(tweet):
+        u = add_user(graph, tweet['actor']['id'], tweet['actor']['preferredUsername'], tweet['actor']['link'])
+        add_relation(graph, u, dummy_user, 'tweet', tweet_id, tweet['link'], test_date(posted_time))
+    elif is_reply(tweet):
+        replying_to_tweet = tweet['inReplyTo']['link']
+        replying_to_user = replying_to_tweet.split('/')[3]
 
-            reply_to = find_user_by_display_name(graph, replying_to_user)
+        reply_to = find_user_by_display_name(graph, replying_to_user)
+        if not reply_to:
+            return tweet
 
-            u = add_user(graph, t['actor']['id'], t['actor']['preferredUsername'], t['actor']['link'])
-            add_relation(graph, u, reply_to, 'reply', tweet_id, t['link'], test_date(posted_time))
-        elif is_retweet(t):
-            link_of_previous_tweet = t['object']['link']
-            replying_to_user = link_of_previous_tweet.split('/')[3]
+        u = add_user(graph, tweet['actor']['id'], tweet['actor']['preferredUsername'], tweet['actor']['link'])
+        add_relation(graph, u, reply_to, 'reply', tweet_id, tweet['link'], test_date(posted_time))
+    elif is_retweet(tweet):
+        link_of_previous_tweet = tweet['object']['link']
+        replying_to_user = link_of_previous_tweet.split('/')[3]
 
-            original_tweet_user = find_user_by_display_name(graph, replying_to_user)
+        original_tweet_user = find_user_by_display_name(graph, replying_to_user)
+        if not original_tweet_user:
+            return tweet
 
-            u = add_user(graph, t['actor']['id'], t['actor']['preferredUsername'], t['actor']['link'])
-            add_relation(graph, u, original_tweet_user, 'retweet', tweet_id, t['link'], test_date(posted_time))
-        else:
-            print('Alien:', t['id'])
+        u = add_user(graph, tweet['actor']['id'], tweet['actor']['preferredUsername'], tweet['actor']['link'])
+        add_relation(graph, u, original_tweet_user, 'retweet', tweet_id, tweet['link'], test_date(posted_time))
+    else:
+        print('Alien:', tweet['id'])
 
-    return len(tweets)
 
-total = 0
+all_rejected_tweets = []
 for f in files:
-    total += read_and_export(f)
+    rejected = read_and_export(f)
+    all_rejected_tweets += rejected
     dot()
-
-print(total)
