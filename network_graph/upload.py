@@ -75,32 +75,48 @@ print('Milestones:', list(map(print_date, MILESTONES)))
 
 
 # Split
-def test_date(dt, milestones=MILESTONES):
+DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
+
+
+def test_date_string(date_str, milestones=MILESTONES):
+    dt = datetime.strptime(date_str, DATETIME_FORMAT).replace(tzinfo=timezone.utc)
     for b in range(0, len(milestones)):
         if dt < milestones[b]:
             return b
     return 4
 
-DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
-
 
 def read_and_export(filename):
     tweets = read_file(filename)
 
-    rejected_tweets = []
     for t in tweets:
-        rejected_tweets.append(process_tweet(t))
+        process_tweet(t)
 
-    return rejected_tweets
+
+USERS_FILE = './network_graph/output/users.csv'
+TWEETS_FILE = './network_graph/output/tweets.csv'
+RETWEETS_FILE = './network_graph/output/retweets.csv'
+REPLIES_FILE = './network_graph/output/replies.csv'
+
+
+users_file = open(USERS_FILE, 'w')
+tweets_file = open(TWEETS_FILE, 'w')
+retweets_file = open(RETWEETS_FILE, 'w')
+replies_file = open(REPLIES_FILE, 'w')
 
 
 def process_tweet(tweet):
     is_reply = lambda tweet: 'inReplyTo' in tweet.keys() and tweet['inReplyTo']
     is_retweet = lambda tweet: tweet['verb'] == 'share'
 
-    posted_time = datetime.strptime(tweet['postedTime'], DATETIME_FORMAT).replace(tzinfo=timezone.utc)
     tweet_id = tweet['id'][tweet['id'].rindex(':') + 1:]
 
 for f in files:
     read_and_export(f)
     dot()
+
+
+users_file.close()
+tweets_file.close()
+retweets_file.close()
+replies_file.close()
