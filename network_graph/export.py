@@ -104,21 +104,21 @@ tweets_file = open(TWEETS_FILE, 'w')
 retweets_file = open(RETWEETS_FILE, 'w')
 replies_file = open(REPLIES_FILE, 'w')
 
-users_file.write('user_id, user_link, user_preferred_username')
-tweets_file.write('tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period')
-retweets_file.write('retweet_id, retweet_user, retweet_link, retweet_posted_time, retweet_period, tweet_id')
-replies_file.write('reply_id, reply_user, reply_link, reply_posted_time, reply_period, tweet_id')
+users_file.write('user_id, user_link, user_preferred_username\n')
+tweets_file.write('tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period\n')
+retweets_file.write('retweet_id, retweet_user, retweet_link, retweet_posted_time, retweet_period, tweet_id\n')
+replies_file.write('reply_id, reply_user, reply_link, reply_posted_time, reply_period, tweet_id\n')
 
 is_reply = lambda tweet: 'inReplyTo' in tweet.keys() and tweet['inReplyTo']
 is_retweet = lambda tweet: tweet['verb'] == 'share'
 print_user = lambda user_id, user_link, user_preferred_username: users_file.write(
-    '{},"{}","{}"'.format(user_id, user_link, user_preferred_username))
+    '{},"{}","{}"\n'.format(user_id, user_link, user_preferred_username))
 print_tweet = lambda tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period: tweets_file.write(
-    '{},{},"{}",{},{}'.format(tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period))
+    '{},{},"{}",{},{}\n'.format(tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period))
 print_retweet = lambda retweet_id, retweet_user, retweet_link, retweet_posted_time, retweet_period, tweet_id: retweets_file.write(
-    '{},{},"{}",{},{},{}'.format(retweet_id, retweet_user, retweet_link, retweet_posted_time, retweet_period, tweet_id))
+    '{},{},"{}",{},{},{}\n'.format(retweet_id, retweet_user, retweet_link, retweet_posted_time, retweet_period, tweet_id))
 print_reply = lambda reply_id, reply_user, reply_link, reply_posted_time, reply_period, tweet_id: replies_file.write(
-    '{},{},"{}",{},{},{}'.format(reply_id, reply_user, reply_link, reply_posted_time, reply_period, tweet_id))
+    '{},{},"{}",{},{},{}\n'.format(reply_id, reply_user, reply_link, reply_posted_time, reply_period, tweet_id))
 
 
 def process_tweet(tweet):
