@@ -104,10 +104,10 @@ tweets_file = open(TWEETS_FILE, 'w')
 retweets_file = open(RETWEETS_FILE, 'w')
 replies_file = open(REPLIES_FILE, 'w')
 
-users_file.write('user_id, user_link, user_preferred_username\n')
-tweets_file.write('tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period\n')
-retweets_file.write('retweet_id, retweet_user, retweet_link, retweet_posted_time, retweet_period, tweet_id\n')
-replies_file.write('reply_id, reply_user, reply_link, reply_posted_time, reply_period, tweet_id\n')
+users_file.write('user_id,user_link,user_preferred_username\n')
+tweets_file.write('tweet_id,tweet_user,tweet_link,tweet_posted_time,tweet_period\n')
+retweets_file.write('retweet_id,retweet_user,retweet_link,retweet_posted_time,retweet_period,tweet_id\n')
+replies_file.write('reply_id,reply_user,reply_link,reply_posted_time,reply_period,tweet_id\n')
 
 is_reply = lambda tweet: 'inReplyTo' in tweet.keys() and tweet['inReplyTo']
 is_retweet = lambda tweet: tweet['verb'] == 'share'
