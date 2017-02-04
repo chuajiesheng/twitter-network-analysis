@@ -104,12 +104,51 @@ tweets_file = open(TWEETS_FILE, 'w')
 retweets_file = open(RETWEETS_FILE, 'w')
 replies_file = open(REPLIES_FILE, 'w')
 
+users_file.write('user_id, user_link, user_preferred_username')
+tweets_file.write('tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period')
+retweets_file.write('retweet_id, retweet_user, retweet_link, retweet_posted_time, retweet_period, tweet_id')
+replies_file.write('reply_id, reply_user, reply_link, reply_posted_time, reply_period, tweet_id')
+
+is_reply = lambda tweet: 'inReplyTo' in tweet.keys() and tweet['inReplyTo']
+is_retweet = lambda tweet: tweet['verb'] == 'share'
+print_user = lambda user_id, user_link, user_preferred_username: users_file.write(
+    '{},"{}","{}"'.format(user_id, user_link, user_preferred_username))
+print_tweet = lambda tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period: tweets_file.write(
+    '{},{},"{}",{},{}'.format(tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period))
+print_retweet = lambda retweet_id, retweet_user, retweet_link, retweet_posted_time, retweet_period, tweet_id: retweets_file.write(
+    '{},{},"{}",{},{},{}'.format(retweet_id, retweet_user, retweet_link, retweet_posted_time, retweet_period, tweet_id))
+print_reply = lambda reply_id, reply_user, reply_link, reply_posted_time, reply_period, tweet_id: replies_file.write(
+    '{},{},"{}",{},{},{}'.format(reply_id, reply_user, reply_link, reply_posted_time, reply_period, tweet_id))
+
 
 def process_tweet(tweet):
-    is_reply = lambda tweet: 'inReplyTo' in tweet.keys() and tweet['inReplyTo']
-    is_retweet = lambda tweet: tweet['verb'] == 'share'
+    user_id = tweet['actor']['id']
+    user_link = tweet['actor']['link']
+    user_preferred_username = tweet['actor']['preferredUsername']
+    print_user(user_id, user_link, user_preferred_username)
 
-    tweet_id = tweet['id'][tweet['id'].rindex(':') + 1:]
+    if is_retweet(tweet):
+        # Save original tweet user details
+        user_id = tweet['object']['actor']['id']
+        user_link = tweet['object']['actor']['link']
+        user_preferred_username = tweet['object']['actor']['preferredUsername']
+        print_user(user_id, user_link, user_preferred_username)
+
+    tweet_id = tweet['id']
+    tweet_user = user_id
+    tweet_link = tweet['link']
+    tweet_posted_time = tweet['postedTime']
+    tweet_period = test_date_string(tweet_posted_time)
+
+    if is_retweet(tweet):
+        retweet_of = tweet['object']['id']
+        print_retweet(tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period, retweet_of)
+    elif is_reply(tweet):
+        reply_link = tweet['inReplyTo']['link']
+        reply_to = 'tag:search.twitter.com,2005:' + reply_link.split('/')[5]
+        print_reply(tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period, reply_to)
+    else:
+        print_tweet(tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period)
 
 for f in files:
     read_and_export(f)
