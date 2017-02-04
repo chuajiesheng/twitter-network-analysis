@@ -1,7 +1,6 @@
 import os
 from datetime import timezone, timedelta, datetime
 import json
-from py2neo import Graph, Node, Relationship, NodeSelector
 
 def read_directory(directory_name):
     files = []
@@ -39,18 +38,10 @@ convert_to_full_path = lambda p: '{}/{}'.format(DIRECTORY, p)
 files = list(map(convert_to_full_path, read_directory(DIRECTORY)))
 assert len(files) == 21888
 
-
 # Logs
 dot = lambda: print('.', end='', flush=True)
 skip = lambda: print('-', end='', flush=True)
 changed = lambda: print('+', end='', flush=True)
-
-# Verify files
-VERIFY_FILES = False
-if VERIFY_FILES:
-    for f in files:
-        read_file(f)
-        dot()
 
 # Periods
 '''
@@ -93,60 +84,6 @@ def test_date(dt, milestones=MILESTONES):
 DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 
-def setup():
-    ENDPOINT = 'bolt://localhost:7687'
-    USERNAME = 'neo4j'
-    PASSWORD = '!abcd1234'
-    graph = Graph(password=PASSWORD)
-    return graph
-
-
-def find_user(graph, name):
-    selector = NodeSelector(graph)
-    return selector.select('TwitterUser', name=name).first()
-
-
-def find_user_by_display_name(graph, display_name):
-    selector = NodeSelector(graph)
-    return selector.select('TwitterUser', display_name=display_name).first()
-
-
-def add_user(graph, name, display_name, link):
-    existing_user = find_user(graph, name)
-    if existing_user:
-        skip()
-        return existing_user
-
-    node = Node('TwitterUser', name=name, display_name=display_name, link=link)
-    graph.create(node)
-    changed()
-    return node
-
-
-def find_relation(graph, start_node, link):
-    for rel in graph.match(start_node=start_node):
-        if rel['link'] == link:
-            return rel
-
-    return None
-
-
-def add_relation(graph, source_node, destination_node, rel_type, tweet_id, link, block):
-    existing_rel = find_relation(graph, source_node, link)
-    if existing_rel:
-        skip()
-        return existing_rel
-
-    rls = Relationship(source_node, rel_type, destination_node, tweet_id=tweet_id, link=link, block=block)
-    graph.create(rls)
-    changed()
-    return rls
-
-graph = setup()
-DUMMY_USER = 'empty'
-dummy_user = add_user(graph, DUMMY_USER, DUMMY_USER, DUMMY_USER)
-
-
 def read_and_export(filename):
     tweets = read_file(filename)
 
@@ -164,43 +101,6 @@ def process_tweet(tweet):
     posted_time = datetime.strptime(tweet['postedTime'], DATETIME_FORMAT).replace(tzinfo=timezone.utc)
     tweet_id = tweet['id'][tweet['id'].rindex(':') + 1:]
 
-    if not is_reply(tweet) and not is_retweet(tweet):
-        u = add_user(graph, tweet['actor']['id'], tweet['actor']['preferredUsername'], tweet['actor']['link'])
-        add_relation(graph, u, dummy_user, 'tweet', tweet_id, tweet['link'], test_date(posted_time))
-    elif is_reply(tweet):
-        replying_to_tweet = tweet['inReplyTo']['link']
-        replying_to_user = replying_to_tweet.split('/')[3]
-
-        reply_to = find_user_by_display_name(graph, replying_to_user)
-        if not reply_to:
-            return tweet
-
-        u = add_user(graph, tweet['actor']['id'], tweet['actor']['preferredUsername'], tweet['actor']['link'])
-        add_relation(graph, u, reply_to, 'reply', tweet_id, tweet['link'], test_date(posted_time))
-    elif is_retweet(tweet):
-        src = add_user(graph, tweet['actor']['id'], tweet['actor']['preferredUsername'], tweet['actor']['link'])
-        dest = add_user(graph, tweet['object']['actor']['id'], tweet['object']['actor']['preferredUsername'], tweet['object']['actor']['link'])
-        add_relation(graph, src, dest, 'retweet', tweet_id, tweet['link'], test_date(posted_time))
-    else:
-        print('Alien:', tweet['id'])
-
-
-all_rejected_tweets = []
 for f in files:
-    rejected = read_and_export(f)
-    all_rejected_tweets += rejected
+    read_and_export(f)
     dot()
-
-new_rejected_tweets = []
-tries_left = 10
-while tries_left > 0:
-    print('Tries:', tries_left, 'Rejected:', len(all_rejected_tweets), end='', flush=True)
-
-    for t in all_rejected_tweets:
-        rejected = process_tweet(t)
-        new_rejected_tweets.append(rejected)
-
-    all_rejected_tweets = new_rejected_tweets
-    new_rejected_tweets = []
-
-print('Remaining rejected:', len(all_rejected_tweets))
