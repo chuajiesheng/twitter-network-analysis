@@ -115,11 +115,11 @@ is_retweet = lambda tweet: tweet['verb'] == 'share'
 print_user = lambda user_id, user_link, user_preferred_username: users_file.write(
     '{},"{}","{}"\n'.format(user_id, user_link, user_preferred_username))
 print_tweet = lambda tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period: tweets_file.write(
-    '{},{},"{}",{},{}\n'.format(tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period))
+    '"{}","{}","{}",{},{}\n'.format(tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period))
 print_retweet = lambda retweet_id, retweet_user, retweet_link, retweet_posted_time, retweet_period, tweet_id: retweets_file.write(
-    '{},{},"{}",{},{},{}\n'.format(retweet_id, retweet_user, retweet_link, retweet_posted_time, retweet_period, tweet_id))
+    '"{}","{}","{}",{},{},"{}"\n'.format(retweet_id, retweet_user, retweet_link, retweet_posted_time, retweet_period, tweet_id))
 print_reply = lambda reply_id, reply_user, reply_link, reply_posted_time, reply_period, tweet_id: replies_file.write(
-    '{},{},"{}",{},{},{}\n'.format(reply_id, reply_user, reply_link, reply_posted_time, reply_period, tweet_id))
+    '"{}","{}","{}",{},{},"{}"\n'.format(reply_id, reply_user, reply_link, reply_posted_time, reply_period, tweet_id))
 
 
 def process_tweet(tweet):
