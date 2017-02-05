@@ -97,17 +97,19 @@ USERS_FILE = './network_graph/output/users.csv'
 TWEETS_FILE = './network_graph/output/tweets.csv'
 RETWEETS_FILE = './network_graph/output/retweets.csv'
 REPLIES_FILE = './network_graph/output/replies.csv'
-
+RELATIONSHIP_FILE = './network_graph/output/relation.csv'
 
 users_file = open(USERS_FILE, 'w')
 tweets_file = open(TWEETS_FILE, 'w')
 retweets_file = open(RETWEETS_FILE, 'w')
 replies_file = open(REPLIES_FILE, 'w')
+relationship_file = open(RELATIONSHIP_FILE, 'w')
 
 users_file.write('userId:ID,link,preferred_username\n')
 tweets_file.write('tweetId:ID,userId,link,posted_time,period\n')
 retweets_file.write('retweetId:ID,userId,link,posted_time,period,tweetId\n')
 replies_file.write('replyId:ID,userId,link,posted_time,period,tweetId\n')
+relationship_file.write(':START_ID,:END_ID,:TYPE\n')
 
 
 is_reply = lambda tweet: 'inReplyTo' in tweet.keys() and tweet['inReplyTo']
@@ -141,13 +143,16 @@ def process_tweet(tweet):
     tweet_posted_time = tweet['postedTime']
     tweet_period = test_date_string(tweet_posted_time)
 
+    relationship_file.write('"{}","{}",{}\n'.format(tweet_user, tweet_id, 'POSTED'))
     if is_retweet(tweet):
         retweet_of = tweet['object']['id']
         print_retweet(tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period, retweet_of)
+        relationship_file.write('"{}","{}",{}\n'.format(tweet_id, retweet_of, 'OF'))
     elif is_reply(tweet):
         reply_link = tweet['inReplyTo']['link']
         reply_to = 'tag:search.twitter.com,2005:' + reply_link.split('/')[5]
         print_reply(tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period, reply_to)
+        relationship_file.write('"{}","{}",{}\n'.format(tweet_id, reply_to, 'REPLY_TO'))
     else:
         print_tweet(tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period)
 
@@ -160,3 +165,4 @@ users_file.close()
 tweets_file.close()
 retweets_file.close()
 replies_file.close()
+relationship_file.close()
