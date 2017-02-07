@@ -116,12 +116,12 @@ is_reply = lambda tweet: 'inReplyTo' in tweet.keys() and tweet['inReplyTo']
 is_retweet = lambda tweet: tweet['verb'] == 'share'
 print_user = lambda user_id, user_link, user_preferred_username: users_file.write(
     '{},"{}","{}"\n'.format(user_id, user_link, user_preferred_username))
-print_tweet = lambda tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period: tweets_file.write(
-    '"{}","{}","{}",{},{}\n'.format(tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period))
-print_retweet = lambda retweet_id, retweet_user, retweet_link, retweet_posted_time, retweet_period: retweets_file.write(
-    '"{}","{}","{}",{},{}\n'.format(retweet_id, retweet_user, retweet_link, retweet_posted_time, retweet_period))
-print_reply = lambda reply_id, reply_user, reply_link, reply_posted_time, reply_period: replies_file.write(
-    '"{}","{}","{}",{},{}\n'.format(reply_id, reply_user, reply_link, reply_posted_time, reply_period))
+print_tweet = lambda tweet_id, tweet_link, tweet_posted_time, tweet_period: tweets_file.write(
+    '"{}","{}",{},{}\n'.format(tweet_id, tweet_link, tweet_posted_time, tweet_period))
+print_retweet = lambda retweet_id, retweet_link, retweet_posted_time, retweet_period: retweets_file.write(
+    '"{}","{}",{},{}\n'.format(retweet_id, retweet_link, retweet_posted_time, retweet_period))
+print_reply = lambda reply_id, reply_link, reply_posted_time, reply_period: replies_file.write(
+    '"{}","{}",{},{}\n'.format(reply_id, reply_link, reply_posted_time, reply_period))
 
 
 def process_tweet(tweet):
@@ -146,15 +146,15 @@ def process_tweet(tweet):
     relationship_file.write('"{}","{}",{}\n'.format(tweet_user, tweet_id, 'POSTED'))
     if is_retweet(tweet):
         retweet_of = tweet['object']['id']
-        print_retweet(tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period)
+        print_retweet(tweet_id, tweet_link, tweet_posted_time, tweet_period)
         relationship_file.write('"{}","{}",{}\n'.format(tweet_id, retweet_of, 'OF'))
     elif is_reply(tweet):
         reply_link = tweet['inReplyTo']['link']
         reply_to = 'tag:search.twitter.com,2005:' + reply_link.split('/')[5]
-        print_reply(tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period)
+        print_reply(tweet_id, tweet_link, tweet_posted_time, tweet_period)
         relationship_file.write('"{}","{}",{}\n'.format(tweet_id, reply_to, 'REPLY_TO'))
     else:
-        print_tweet(tweet_id, tweet_user, tweet_link, tweet_posted_time, tweet_period)
+        print_tweet(tweet_id, tweet_link, tweet_posted_time, tweet_period)
 
 for f in files:
     read_and_export(f)
