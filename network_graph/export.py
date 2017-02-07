@@ -106,9 +106,9 @@ replies_file = open(REPLIES_FILE, 'w')
 relationship_file = open(RELATIONSHIP_FILE, 'w')
 
 users_file.write('userId:ID,link,preferred_username\n')
-tweets_file.write('tweetId:ID,userId,link,posted_time,period\n')
-retweets_file.write('tweetId:ID,userId,link,posted_time,period\n')
-replies_file.write('tweetId:ID,userId,link,posted_time,period\n')
+tweets_file.write('tweetId:ID,link,posted_time,period\n')
+retweets_file.write('tweetId:ID,link,posted_time,period\n')
+replies_file.write('tweetId:ID,link,posted_time,period\n')
 relationship_file.write(':START_ID,:END_ID,:TYPE\n')
 
 
