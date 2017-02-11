@@ -3,7 +3,8 @@ g = Graph(password='!abcd1234')
 
 # Calculate level
 
-init_str = 'MATCH (t:Tweet) WHERE NOT (t)<-[:OF|:REPLY_TO]-(:Tweet) SET t.level = 0 RETURN COUNT(t)'
+init_str = 'MATCH (t:Tweet) WHERE NOT (t)<-[:OF|:REPLY_TO]-(:Tweet) SET t.level = 0, t.child_nodes = 0 RETURN COUNT(t)'
+print(init_str)
 o = g.run(init_str).data()
 print('Level', 0, ':', o[0]['COUNT(t)'])
 
@@ -19,10 +20,6 @@ for i in range(0, 50):
         break
 
 # Calculate aggregate child nodes
-
-init_str = 'MATCH (t:Tweet) WHERE NOT (t)<-[:OF|:REPLY_TO]-(:Tweet) SET t.child_nodes = 0 RETURN COUNT(t)'
-o = g.run(init_str).data()
-print(0, 'child nodes', ':', o[0]['COUNT(t)'])
 
 update_str = 'MATCH (t2:Tweet)-[r:OF|:REPLY_TO]->(t1:Tweet) ' \
              'WHERE t1.level = {} ' \
