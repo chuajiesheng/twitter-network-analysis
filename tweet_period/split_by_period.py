@@ -67,11 +67,11 @@ if VERIFY_FILES:
 └──────────────────┘│└──────────────────┘│└──────────────────┘│└──────────────────┘│└──────────────────┘
                     │                    │                    │                    │
 '''
-PACIFIC = timezone(-timedelta(hours=8))
-MILESTONES = [datetime(2015, 11, 2, tzinfo=PACIFIC),
-              datetime(2015, 11, 20, tzinfo=PACIFIC),
-              datetime(2015, 12, 10, tzinfo=PACIFIC),
-              datetime(2015, 12, 16, tzinfo=PACIFIC)]
+EASTERN = timezone(-timedelta(hours=5))
+MILESTONES = [datetime(2015, 11, 2, tzinfo=EASTERN),
+              datetime(2015, 11, 20, tzinfo=EASTERN),
+              datetime(2015, 12, 10, tzinfo=EASTERN),
+              datetime(2015, 12, 16, tzinfo=EASTERN)]
 
 print_date = lambda dt: dt.isoformat(timespec='microseconds')
 print('Milestones:', list(map(print_date, MILESTONES)))
